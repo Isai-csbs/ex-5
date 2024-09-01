@@ -1,0 +1,36 @@
+import numpy as np
+import scipy.stats as stats
+import matplotlib.pyplot as plt
+from scipy.optimize import minimize
+
+# Generate synthetic data from a normal distribution
+np.random.seed(42)
+data = np.random.normal(loc=5.0, scale=2.0, size=1000)
+
+# Define the negative log-likelihood function for normal distribution
+def neg_log_likelihood(params, data):
+    mu, sigma = params[0], params[1]
+    if sigma <= 0:  # sigma must be positive
+        return np.inf
+    return -np.sum(stats.norm.logpdf(data, loc=mu, scale=sigma))
+
+# Initial guess for the parameters (mu, sigma)
+initial_params = [0, 1]
+
+# Perform the MLE by minimizing the negative log-likelihood
+result = minimize(neg_log_likelihood, initial_params, args=(data,))
+mu_mle, sigma_mle = result.x
+
+# Print the estimated parameters
+print(f"Estimated Mean (MLE): {mu_mle}")
+print(f"Estimated Standard Deviation (MLE): {sigma_mle}")
+
+# Plotting the data and the estimated distribution
+plt.hist(data, bins=30, density=True, alpha=0.6, color='g', label='Data')
+x = np.linspace(min(data), max(data), 1000)
+plt.plot(x, stats.norm.pdf(x, mu_mle, sigma_mle), 'k-', lw=2, label='Estimated Normal PDF')
+plt.title("Data Histogram and Estimated Normal Distribution")
+plt.xlabel('Value')
+plt.ylabel('Density')
+plt.legend()
+plt.show()
